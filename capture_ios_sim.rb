@@ -64,15 +64,19 @@ def cmd(command)
 	pid = wait_thr[:pid]
 	verbose("PID: #{wait_thr.pid}")
 
+	code = wait_thr.value
+	fail("Your computer does not support Metal") if code.termsig == SIGIOT
+	fail("#{command} failed (#{code}): #{stderr.read}") if code != 0
 	yield(pid) if block_given?
 
-	code = wait_thr.value
-	fail("#{command} failed (#{code}): #{stderr.read}") if code != 0
+	stdout.read
 end
 
 ###
 # CONSTANTS
 ###
+
+SIGIOT = 6
 
 timestamp = DateTime.now.to_time.to_i.to_s
 MOV_FILE = "/tmp/capture-#{timestamp}.mov"
@@ -85,6 +89,7 @@ verbose("Output files: #{MOV_FILE}, #{GIF_FILE}")
 
 begin
 
+	# Check dependencies
 	commands = [:ffmpeg, :xcrun].map do |cmd|
 		path = `which #{cmd}`
 		fail("Command [#{cmd}] is missing. Please install it.") if path.length == 0
@@ -96,23 +101,25 @@ begin
 	print "📱  Launch your simulator, then hit return key to start recording..."
 	readline
 
+	# xcrun: start capture on booted ios sim
 	cmd("#{commands[:xcrun]} simctl io booted recordVideo #{MOV_FILE}") do |pid|
 		print "🔴  Recording simulator... Type return key to end capture..."
 		readline
-
 		Process.kill("INT", pid)
 	end
 
+	# ffmpeg: convert .mov to .gif
 	cmd("#{commands[:ffmpeg]} -i #{MOV_FILE} -vf scale=#{OPTIONS[:width]}:-1 -r #{OPTIONS[:frame_rate]} -pix_fmt rgb24 #{GIF_FILE}") do |pid|
 		puts "🎬  Processing ffmpeg..."
 	end
 
+	# final output
 	cmd("cp #{GIF_FILE} #{OPTIONS[:output_file]}")
 
 	puts "✅  Done! Your gif: #{OPTIONS[:output_file]}"
 	cmd("open #{OPTIONS[:output_file]}")
 
-rescue Interrupt
+rescue Interrupt # Intercept Ctrl-C
 
 	puts ""
 	puts "🚪  Exit"
