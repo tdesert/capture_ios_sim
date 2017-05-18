@@ -64,10 +64,10 @@ def cmd(command)
 	pid = wait_thr[:pid]
 	verbose("PID: #{wait_thr.pid}")
 
+	yield(pid) if block_given?
 	code = wait_thr.value
 	fail("Your computer does not support Metal") if code.termsig == SIGIOT
-	fail("#{command} failed (#{code}): #{stderr.read}") if code != 0
-	yield(pid) if block_given?
+	fail("#{command} failed (#{code}): #{stderr.read}") if code != 0	
 
 	stdout.read
 end
