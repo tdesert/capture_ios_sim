@@ -14,8 +14,8 @@ LOG_LEVEL = {
 }
 
 OPTIONS = {
-	frame_rate: 15,
-	width: 300,
+	frame_rate: 10,
+	width: 250,
 	log_level: LOG_LEVEL[:default],
 	output_file: "#{Dir.pwd}/capture.gif"
 }
@@ -90,9 +90,9 @@ verbose("Output files: #{MOV_FILE}, #{GIF_FILE}")
 begin
 
 	# Check dependencies
-	commands = [:ffmpeg, :xcrun].map do |cmd|
+	commands = [:ffmpeg, :xcrun, :gifsicle].map do |cmd|
 		path = `which #{cmd}`
-		fail("Command [#{cmd}] is missing. Please install it.") if path.length == 0
+		fail("Command [#{cmd}] is missing. Please install it (brew install #{cmd}).") if path.length == 0
 		{cmd => path[0...path.length - 1]}
 	end.reduce({}, :merge)
 
@@ -109,7 +109,7 @@ begin
 	end
 
 	# ffmpeg: convert .mov to .gif
-	cmd("#{commands[:ffmpeg]} -i #{MOV_FILE} -vf scale=#{OPTIONS[:width]}:-1 -r #{OPTIONS[:frame_rate]} -pix_fmt rgb24 #{GIF_FILE}") do |pid|
+	cmd("#{commands[:ffmpeg]} -i #{MOV_FILE} -pix_fmt rgb24 -vf scale=#{OPTIONS[:width]}:-1 -r #{OPTIONS[:frame_rate]} -f gif - | #{commands[:gifsicle]} -O3 -d3 --delay #{OPTIONS[:frame_rate]} > #{GIF_FILE}") do |pid|
 		puts "🎬  Processing ffmpeg..."
 	end
 
