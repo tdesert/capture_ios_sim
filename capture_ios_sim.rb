@@ -14,8 +14,8 @@ LOG_LEVEL = {
 }
 
 OPTIONS = {
-	frame_rate: 10,
-	width: 250,
+	frame_rate: 15,
+	width: 300,
 	log_level: LOG_LEVEL[:default],
 	output_file: "#{Dir.pwd}/capture.gif"
 }
