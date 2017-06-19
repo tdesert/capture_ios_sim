@@ -1,4 +1,4 @@
-# Capture iOS simulator to animated GIF
+# 📱 Capture iOS simulator to animated GIF
 
 ## Usage
 ```
