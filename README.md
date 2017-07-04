@@ -14,5 +14,6 @@ Usage: ./capture_ios_sim.rb [options]
 git clone git@github.com:tdesert/capture_ios_sim.git
 cd ./capture_ios_sim
 chmod +x ./capture_ios_sim.rb
+brew bundle
 ./capture_ios_sim.rb
 ```
