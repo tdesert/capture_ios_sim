@@ -1,0 +1,2 @@
+brew 'gifsicle'
+brew 'ffmpeg'
