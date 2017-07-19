@@ -92,7 +92,7 @@ begin
 	# Check dependencies
 	commands = [:ffmpeg, :xcrun, :gifsicle].map do |cmd|
 		path = `which #{cmd}`
-		fail("Command [#{cmd}] is missing. Please install it (brew install #{cmd}).") if path.length == 0
+		fail("Command [#{cmd}] is missing. Please install it (brew bundle install).") if path.length == 0
 		{cmd => path[0...path.length - 1]}
 	end.reduce({}, :merge)
 
