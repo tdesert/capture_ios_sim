@@ -7,6 +7,7 @@ Usage: ./capture_ios_sim.rb [options]
     -r, --framerate N                Frames per second of output gif (default: 15)
     -w, --width N                    Width of output gif (default: 300)
     -o, --output <file>              Output gif path (default: ./capture.gif)
+    -k, --keep                       Keep .mov file along with generated gif (default: false)
 ```
 
 ## Setup
