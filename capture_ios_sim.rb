@@ -8,6 +8,8 @@ require 'optparse'
 # OPTIONS
 ###
 
+DEFAULT_FILENAME = "capture.gif"
+
 LOG_LEVEL = {
 	verbose: 	0,
 	default: 	1
@@ -17,7 +19,8 @@ OPTIONS = {
 	frame_rate: 15,
 	width: 300,
 	log_level: LOG_LEVEL[:default],
-	output_file: "#{Dir.pwd}/capture.gif"
+	output_file: "#{Dir.pwd}/#{DEFAULT_FILENAME}",
+	keep_mov: false
 }
 
 OptionParser.new do |opts|
@@ -33,7 +36,10 @@ OptionParser.new do |opts|
 		OPTIONS[:width] = v
 	end
 	opts.on("-o", "--output <file>", String, "Output gif path (default: #{OPTIONS[:output_file]})") do |v|
-		OPTIONS[:output_file] = v
+		OPTIONS[:output_file] = sanitize_filepath(v, "gif")
+	end
+	opts.on("-k", "--keep", "Keep .mov file along with generated gif (default: #{OPTIONS[:keep_mov]})") do |v|
+		OPTIONS[:keep_mov] = v
 	end
 end.parse!
 
@@ -70,6 +76,18 @@ def cmd(command)
 	fail("#{command} failed (#{code}): #{stderr.read}") if code != 0	
 
 	stdout.read
+end
+
+def sanitize_filepath(filepath, default_ext, replace_ext = false)
+	if replace_ext == false then
+		ext = File.extname(filepath).downcase 
+		if ext.length == 0 then
+			ext = ".#{default_ext}"
+		end
+	else
+		ext = ".#{default_ext}"
+	end
+	return File.join(File.dirname(filepath), "#{File.basename(filepath,File.extname(filepath))}#{ext}")
 end
 
 ###
@@ -115,6 +133,12 @@ begin
 
 	# final output
 	cmd("cp #{GIF_FILE} #{OPTIONS[:output_file]}")
+
+	# keep .mov file if needed
+	if OPTIONS[:keep_mov] then
+		mov_fileoutput = sanitize_filepath(OPTIONS[:output_file], "mov", true)
+		cmd("cp #{MOV_FILE} #{mov_fileoutput}")
+	end
 
 	puts "✅  Done! Your gif: #{OPTIONS[:output_file]}"
 	cmd("open #{OPTIONS[:output_file]}")
